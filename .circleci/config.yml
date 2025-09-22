@@ -2,10 +2,15 @@ version: 2.1
 jobs:
   terraform_plan:
     docker:
-      - image: hashicorp/terraform:light
+      - image: mcr.microsoft.com/azure-cli
     steps:
       - checkout
-      # In your CircleCI config.yml, within the job steps:
+      - run:
+          name: Install Terraform
+          command: |
+            curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+            apt-get update && apt-get install terraform -y
       - run:
           name: Set Azure Environment Variables
           command: |
@@ -23,10 +28,15 @@ jobs:
 
   terraform_apply:
     docker:
-      - image: hashicorp/terraform:light
+      - image: mcr.microsoft.com/azure-cli
     steps:
       - checkout
-      # In your CircleCI config.yml, within the job steps:
+      - run:
+          name: Install Terraform
+          command: |
+            curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+            apt-get update && apt-get install terraform -y
       - run:
           name: Set Azure Environment Variables
           command: |
@@ -36,17 +46,18 @@ jobs:
             echo 'export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"' >> $BASH_ENV
             source $BASH_ENV
       - run:
-          name: Initialize Terraform
-          command: terraform init
-      - run:
           name: Terraform Apply
-          command: terraform apply -auto-approve
+          command: terraform apply
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
       - terraform_plan
-      - terraform_apply:
+      - hold_for_approval:
+          type: approval
           requires:
             - terraform_plan
+      - terraform_apply:
+          requires:
+            - hold_for_approval
