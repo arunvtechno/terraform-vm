@@ -5,6 +5,15 @@ jobs:
       - image: hashicorp/terraform:light
     steps:
       - checkout
+      # In your CircleCI config.yml, within the job steps:
+      - run:
+          name: Set Azure Environment Variables
+          command: |
+            echo 'export ARM_CLIENT_ID="${AZURE_CLIENT_ID}"' >> $BASH_ENV
+            echo 'export ARM_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"' >> $BASH_ENV
+            echo 'export ARM_TENANT_ID="${AZURE_TENANT_ID}"' >> $BASH_ENV
+            echo 'export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Initialize Terraform
           command: terraform init
@@ -17,6 +26,15 @@ jobs:
       - image: hashicorp/terraform:light
     steps:
       - checkout
+      # In your CircleCI config.yml, within the job steps:
+      - run:
+          name: Set Azure Environment Variables
+          command: |
+            echo 'export ARM_CLIENT_ID="${AZURE_CLIENT_ID}"' >> $BASH_ENV
+            echo 'export ARM_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"' >> $BASH_ENV
+            echo 'export ARM_TENANT_ID="${AZURE_TENANT_ID}"' >> $BASH_ENV
+            echo 'export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Initialize Terraform
           command: terraform init
